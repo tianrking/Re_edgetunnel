@@ -1,0 +1,25 @@
+name = "edgetunnel"
+main = "src/index.js"
+compatibility_date = "2023-12-01"
+
+# [Routes]
+# Uncomment and replace with your own domain
+# routes = [
+# 	{ pattern = "your-domain.com", custom_domain = true }
+# ]
+
+[vars]
+# [UUID]
+# Default: Auto-generated on first run.
+# You can set a fixed UUID here (Recommended for consistency).
+# UUID = "8a5ea040-33ff-4227-88bd-414bb865e59b"
+
+# [Proxy IP]
+# PROXYIP = "1.2.3.4"
+
+# [KV Namespace]
+# Run `npx wrangler kv namespace create edgetunnel` to get the ID
+# Replace "your-kv-id-here" with the ID you got
+[[kv_namespaces]]
+binding = "KV"
+id = "your-kv-id-here"
