@@ -11,7 +11,7 @@
 > 它吸取了社区现有方案的设计思路，但采用**全模块化架构**从零重写，专为工程化部署和二次开发设计。
 
 ![Status](https://img.shields.io/badge/Status-Active-success)
-![Author](https://img.shields.io/badge/Author-w0x7ce-blue)
+![Author](https://img.shields.io/badge/Author-tianrking-blue)
 
 ---
 
