@@ -1,8 +1,8 @@
 
-import { readConfig, logRequest } from "../config.js";
-import { getCloudflareUsage, requestOptimalAPI, generateRandomIP } from "../utils/ip.js";
+import { readConfig } from "../config.js";
+import { httpConnect, socks5Connect } from "../protocols/socks5.js";
 import { getSocks5Account } from "../utils/helpers.js";
-import { socks5Connect, httpConnect } from "../protocols/socks5.js";
+import { generateRandomIP, getCloudflareUsage, requestOptimalAPI } from "../utils/ip.js";
 
 async function checkSocksProxy(protocol, param) {
     const startTime = Date.now();
@@ -119,10 +119,10 @@ export async function handleAdmin(request, env, config, path) {
             } catch (err) {
                 return new Response(JSON.stringify({ error: err.message }), { status: 500 });
             }
-        } else if (path === 'admin/ADD.txt') {
+        } else if (path === 'admin/add.txt') {
             try {
                 const txt = await request.text();
-                await env.KV.put('ADD.txt', txt);
+                await env.KV.put('add.txt', txt);
                 return new Response(JSON.stringify({ success: true }), { status: 200 });
             } catch (err) {
                 return new Response(JSON.stringify({ error: err.message }), { status: 500 });
@@ -130,8 +130,8 @@ export async function handleAdmin(request, env, config, path) {
         }
     } else if (path === 'admin/config.json') {
         return new Response(JSON.stringify(config, null, 2), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    } else if (path === 'admin/ADD.txt') {
-        let localIPs = await env.KV.get('ADD.txt') || 'null';
+    } else if (path === 'admin/add.txt') {
+        let localIPs = await env.KV.get('add.txt') || 'null';
         if (localIPs == 'null') {
             const [ips, str] = await generateRandomIP(request, config.优选订阅生成.本地IP库.随机数量, config.优选订阅生成.本地IP库.指定端口);
             localIPs = str;

@@ -1,11 +1,11 @@
 
 import { readConfig } from './config.js';
-import { handleLogin, checkAuth, handleLogout } from './controllers/auth.js';
 import { handleAdmin } from './controllers/admin.js';
+import { checkAuth, handleLogin, handleLogout } from './controllers/auth.js';
 import { handleSub } from './controllers/sub.js';
 import { handleWSRequest } from './core/proxy.js';
 import { MD5MD5, uuidRegex } from './utils/helpers.js';
-import { nginx, html1101, fetchMasquerade } from './utils/pages.js';
+import { fetchMasquerade, html1101, nginx } from './utils/pages.js';
 
 export default {
     async fetch(request, env, ctx) {
