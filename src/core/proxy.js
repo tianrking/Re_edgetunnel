@@ -202,8 +202,8 @@ export async function handleWSRequest(request, yourUUID, proxyConfig) {
     serverSock.accept();
     let remoteConnWrapper = { socket: null };
     let isDnsQuery = false;
-    const earlyData = request.headers.get('sec-websocket-protocol') || '';
-    const readable = makeReadableStr(serverSock, earlyData);
+    const earlyDataHeader = (request.headers.get('sec-websocket-protocol') || '').substring(0, 1024); // 限制长度
+    const readable = makeReadableStr(serverSock, earlyDataHeader);
     let isTrojan = null;
 
     readable.pipeTo(new WritableStream({
