@@ -16,7 +16,7 @@ export default {
 
         let userIDMD5 = '';
         try {
-            userIDMD5 = await MD5MD5(adminPassword + secretKey);
+            userIDMD5 = await MD5MD5((adminPassword?.trim() || '') + (secretKey?.trim() || ''));
         } catch (e) { userIDMD5 = '00000000-0000-0000-0000-000000000000'; }
 
         const envUUID = env.UUID || env.uuid;

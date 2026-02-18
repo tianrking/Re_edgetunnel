@@ -101,7 +101,12 @@ export async function handleSub(request, env, config) {
 
     if (!ua.includes('subconverter')) content = batchReplaceDomain(content.replace(new RegExp("00000000-0000-4000-8000-000000000000", 'g'), config.UUID), config.HOSTS);
 
-    if (type === 'mixed' && (!ua.includes('mozilla') || url.searchParams.has('base64'))) content = btoa(content);
+    if (type === 'mixed' && (!ua.includes('mozilla') || url.searchParams.has('base64'))) {
+        // 使用标准Base64编码，避免特殊字符问题
+        const encoder = new TextEncoder();
+        const data = encoder.encode(content);
+        content = btoa(String.fromCharCode(...data));
+    }
 
     if (type === 'singbox') {
         const echVal = config.ECH ? await getECH(config.ECHConfig.SNI || host) : null;

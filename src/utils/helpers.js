@@ -154,7 +154,7 @@ export async function getSocks5Account(address) {
     }
 
     if (isNaN(port)) throw new Error('无效的 SOCKS 地址格式：端口号必须是数字');
-    if (hostname.includes(":") && !/^\[.*\]$/.test(hostname)) throw new Error('无效的 SOCKS 地址格式：IPv6 地址必须用方括号括起来，如 [2001:db8::1]');
+    if (hostname.includes(":") && !/^\[[a-fA-F0-9:]+\]$/.test(hostname)) throw new Error('无效的 SOCKS 地址格式：IPv6 地址必须用方括号括起来，如 [2001:db8::1]');
 
     return { username, password, hostname, port };
 }

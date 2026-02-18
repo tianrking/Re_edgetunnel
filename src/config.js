@@ -200,7 +200,11 @@ export async function logRequest(env, request, accessIP, type = "Get_SUB", confi
                     try {
                         const tgStr = await env.KV.get('tg.json');
                         const tg = JSON.parse(tgStr);
-                        await sendTGMessage(tg.BotToken, tg.ChatID, logContent, config);
+                        if (tg?.BotToken?.trim() && tg?.ChatID?.trim()) {
+                            await sendTGMessage(tg.BotToken.trim(), tg.ChatID.trim(), logContent, config);
+                        } else {
+                            console.warn('TG配置无效: BotToken或ChatID为空');
+                        }
                     } catch (error) { console.error(`读取tg.json出错: ${error.message}`) }
                 }
             } catch (e) { logArray = [logContent]; }
