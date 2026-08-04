@@ -125,7 +125,10 @@ export function buildShadowsocksUri({
         .replace(/\//g, '_')
         .replace(/=+$/, '');
     const pluginPath = `${path}${String(path).includes('?') ? '&' : '?'}enc=${encodeURIComponent(normalizedMethod)}`;
-    const plugin = `v2ray-plugin;mode=websocket;host=${host};path=${pluginPath}${tls ? ';tls' : ''}`;
+    // The Worker implements the standard Shadowsocks AEAD stream. Mihomo's
+    // v2ray-plugin defaults to its mux extension, which is a different wire
+    // protocol, so explicitly disable mux in generated links.
+    const plugin = `v2ray-plugin;mode=websocket;host=${host};path=${pluginPath}${tls ? ';tls' : ''};mux=0`;
     const params = new URLSearchParams({ plugin });
     const formattedAddress = String(address).includes(':') && !String(address).startsWith('[')
         ? `[${address}]`

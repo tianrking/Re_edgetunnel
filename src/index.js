@@ -11,6 +11,32 @@ import { parseSpeedTestDomains, parseSpeedTestMode } from './core/speedtest.js';
 import { handleGrpcRequest, handleXHttpRequest } from './core/http-tunnel.js';
 import { parseUpstreamProxy } from './protocols/upstream.js';
 
+async function looksLikeGrpcPayload(request) {
+    try {
+        const clone = request.clone();
+        const reader = clone.body?.getReader();
+        if (!reader) return true;
+        let prefix = new Uint8Array(0);
+        while (prefix.byteLength < 6) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (!value?.byteLength) continue;
+            const joined = new Uint8Array(prefix.byteLength + value.byteLength);
+            joined.set(prefix);
+            joined.set(value, prefix.byteLength);
+            prefix = joined;
+        }
+        try { await reader.cancel(); } catch { }
+        if (prefix.byteLength < 6 || prefix[0] !== 0) return false;
+        const frameLength = new DataView(prefix.buffer, prefix.byteOffset, prefix.byteLength).getUint32(1);
+        return frameLength > 0 && frameLength <= 1024 * 1024 && prefix[5] === 0x0a;
+    } catch {
+        // If the platform cannot tee the request body, preserve the legacy
+        // application/grpc routing rather than rejecting a valid request.
+        return true;
+    }
+}
+
 export default {
     async fetch(request, env, ctx) {
         const url = new URL(request.url);
@@ -77,12 +103,19 @@ export default {
         const contentType = request.headers.get('content-type')?.toLowerCase() || '';
         const isReservedHttpRoute = pathLower === 'login' || pathLower === 'sub' || pathLower.startsWith('admin/');
         if (request.method === 'POST' && !isReservedHttpRoute) {
-            if (contentType.startsWith('application/grpc')) {
-                return handleGrpcRequest(request, userID, createProxyConfig());
-            }
             const referer = request.headers.get('referer') || '';
-            if (contentType.startsWith('application/octet-stream') || referer.includes('x_padding=')) {
+            if (contentType.startsWith('application/octet-stream')) {
                 return handleXHttpRequest(request, userID, createProxyConfig());
+            }
+            if (contentType.startsWith('application/grpc')) {
+                // XHTTP stream-one can camouflage itself as application/grpc,
+                // but its body starts with the raw VLESS header. Real gRPC
+                // starts with a five-byte frame header followed by the hunk
+                // field (0x0a).
+                if (referer.includes('x_padding=') || !(await looksLikeGrpcPayload(request))) {
+                    return handleXHttpRequest(request, userID, createProxyConfig());
+                }
+                return handleGrpcRequest(request, userID, createProxyConfig());
             }
         }
 
